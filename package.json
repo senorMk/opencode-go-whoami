@@ -1,0 +1,18 @@
+{
+  "name": "opencode-go-whoami",
+  "version": "0.1.0",
+  "description": "Show which OpenCode Go / Zen account is signed in (key fingerprint + your email labels).",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "opencode-go-whoami": "./bin/cli.mjs"
+  },
+  "peerDependencies": {
+    "@opencode-ai/plugin": "^1.18.0"
+  },
+  "peerDependenciesMeta": {
+    "@opencode-ai/plugin": {
+      "optional": true
+    }
+  }
+}

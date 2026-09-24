@@ -1,0 +1,13 @@
+{
+  "_comment": "Map key fingerprints to your emails. Get the fingerprint by running: node bin/cli.mjs  (or the go_whoami tool). OpenCode stores API keys only, not emails, so this file is how we show 'which email'.",
+  "accounts": {
+    "abc123def456": {
+      "email": "you-personal@example.com",
+      "label": "personal"
+    },
+    "7890abcdef12": "you-work@example.com"
+  },
+  "byPrefix": {
+    "sk-AcMe": "you-personal@example.com"
+  }
+}
