@@ -39,6 +39,9 @@ export function resolveAuthPath(): string | null {
 export function resolveMappingPath(): string | null {
   const candidates: (string | undefined)[] = [
     process.env.GO_WHOAMI_MAP,
+    process.env.XDG_CONFIG_HOME
+      ? join(process.env.XDG_CONFIG_HOME, "opencode", "go-accounts.json")
+      : undefined,
     join(homedir(), ".config", "opencode", "go-accounts.json"),
   ];
   for (const c of candidates) {
@@ -49,7 +52,7 @@ export function resolveMappingPath(): string | null {
 
 export function defaultMappingPath(): string {
   if (process.env.GO_WHOAMI_MAP) return process.env.GO_WHOAMI_MAP;
-  return join(homedir(), ".config", "opencode", "go-accounts.json");
+  return join(process.env.XDG_CONFIG_HOME || join(homedir(), ".config"), "opencode", "go-accounts.json");
 }
 
 export function fingerprint(key: string): string {

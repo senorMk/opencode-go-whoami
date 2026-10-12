@@ -1,17 +1,9 @@
 /** @jsxImportSource @opentui/solid */
-import type {
-  TuiPlugin,
-  TuiPluginApi,
-  TuiPluginModule,
-} from "@opencode-ai/plugin/tui";
+import { Plugin } from "@opencode/plugin/tui";
 import { createSignal, onCleanup, Show } from "solid-js";
 import { buildReport } from "./whoami.js";
 
-const id = "opencode-go-whoami";
-// Sit next to the Quota panel (order 150) in the session sidebar.
-const SIDEBAR_ORDER = 140;
-
-function AccountSidebar(props: { api: TuiPluginApi }) {
+function AccountSidebar(props: { api: Plugin.Context }) {
   const [report, setReport] = createSignal(buildReport());
 
   const refresh = () => {
@@ -21,11 +13,12 @@ function AccountSidebar(props: { api: TuiPluginApi }) {
       // Keep the last good state; never break the sidebar.
     }
   };
-  const offSelect = props.api.event.on("tui.session.select", refresh);
-  const offUpdated = props.api.event.on("session.updated", refresh);
+  const offUpdated = props.api.data.on("session.step.ended", refresh);
+  // Also pick up account changes made outside the current session.
+  const timer = setInterval(refresh, 5000);
   onCleanup(() => {
-    offSelect();
     offUpdated();
+    clearInterval(timer);
   });
 
   const primary = () =>
@@ -45,11 +38,11 @@ function AccountSidebar(props: { api: TuiPluginApi }) {
     <Show when={primary()}>
       <box gap={0}>
         <box flexDirection="row">
-          <text fg={props.api.theme.current.text}>
+          <text fg={props.api.theme.text.base}>
             <b>Account</b>
           </text>
         </box>
-        <text fg={props.api.theme.current.textMuted} wrapMode="none">
+        <text fg={props.api.theme.text.muted} wrapMode="none">
           {line()}
         </text>
       </box>
@@ -57,20 +50,13 @@ function AccountSidebar(props: { api: TuiPluginApi }) {
   );
 }
 
-const tui: TuiPlugin = async (api, options) => {
-  const enabled =
-    (options as { enabled?: boolean } | undefined)?.enabled !== false;
-  if (!enabled) return;
-
-  api.slots.register({
-    order: SIDEBAR_ORDER,
-    slots: {
-      sidebar_content() {
-        return <AccountSidebar api={api} />;
-      },
-    },
-  });
-};
-
-const pluginModule: TuiPluginModule = { id, tui };
-export default pluginModule;
+export default Plugin.define({
+  id: "opencode-go-whoami",
+  setup(api) {
+    if (api.options.enabled === false) return;
+    return api.ui.slot({
+      append: "sidebar.content",
+      render: () => <AccountSidebar api={api} />,
+    });
+  },
+});

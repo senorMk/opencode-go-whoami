@@ -10,8 +10,6 @@ set -eu
 
 SRC_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/opencode"
-PLUGIN_DIR="$CONFIG_DIR/plugins"
-COMMAND_DIR="$CONFIG_DIR/command"
 MAP="$CONFIG_DIR/go-accounts.json"
 
 if ! command -v node >/dev/null 2>&1; then
@@ -105,47 +103,5 @@ console.log("Saved " + lines.length + " email label(s) to " + mapPath);
 ' "$MAP" "$ANSWERS_FILE" > "$MAP_TMP"
 cat "$MAP_TMP"
 
-# 4. Link the plugin (copies two files, nothing else is touched).
-mkdir -p "$PLUGIN_DIR"
-cp "$SRC_DIR/src/whoami.ts" "$PLUGIN_DIR/go-whoami-whoami.ts"
-sed 's#./whoami.js#./go-whoami-whoami.js#' "$SRC_DIR/src/index.ts" > "$PLUGIN_DIR/go-whoami.ts"
-echo "Plugin linked."
-
-# 5. Add the /go-whoami slash command.
-mkdir -p "$COMMAND_DIR"
-cp "$SRC_DIR/command/go-whoami.md" "$COMMAND_DIR/go-whoami.md"
-echo "Added /go-whoami command."
-
-# 6. Add the permanent sidebar panel (shows your email in every session).
-TUI_TSX="$PLUGIN_DIR/go-whoami-tui.tsx"
-sed 's#./whoami.js#./go-whoami-whoami.js#' "$SRC_DIR/src/tui.tsx" > "$TUI_TSX"
-echo "Sidebar panel installed."
-TUI_JSON="$CONFIG_DIR/tui.json"
-node -e '
-const {readFileSync,writeFileSync,existsSync,copyFileSync} = require("node:fs");
-const tuiPath = process.argv[1], entry = process.argv[2];
-let cfg = {};
-const existed = existsSync(tuiPath);
-try {
-  if (existed) cfg = JSON.parse(readFileSync(tuiPath,"utf8"));
-} catch(e) {
-  console.log("Could not read " + tuiPath + " (is it JSON?). Add this manually to tui.json \"plugin\": [\"" + entry + "\", {}]");
-  process.exit(0);
-}
-if (!Array.isArray(cfg.plugin)) cfg.plugin = [];
-const already = cfg.plugin.some((p) => String(Array.isArray(p) ? p[0] : p).endsWith("go-whoami-tui.tsx"));
-if (!already) {
-  if (existed) copyFileSync(tuiPath, tuiPath + ".bak-" + new Date().toISOString().slice(0,10).replace(/-/g,""));
-  cfg.plugin.push([entry, {}]);
-  if (!cfg.$schema) cfg.$schema = "https://opencode.ai/tui.json";
-  writeFileSync(tuiPath, JSON.stringify(cfg,null,2)+"\n");
-  console.log("Registered sidebar panel in tui.json.");
-} else {
-  console.log("tui.json already lists the sidebar panel.");
-}
-' "$TUI_JSON" "$TUI_TSX"
-
-echo ""
-echo "Done! Restart opencode."
-echo "Your email now shows permanently in the session sidebar,"
-echo "and /go-whoami still works for full details."
+# 4. Install the server plugin, sidebar, and /go-whoami command.
+sh "$SRC_DIR/scripts/link-global.sh"

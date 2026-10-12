@@ -7,11 +7,18 @@
   "bin": {
     "opencode-go-whoami": "./bin/cli.mjs"
   },
+  "exports": {
+    ".": "./src/index.ts",
+    "./tui": "./src/tui.tsx"
+  },
+  "scripts": {
+    "test": "bun test"
+  },
   "peerDependencies": {
-    "@opencode-ai/plugin": "^1.18.0"
+    "@opencode/plugin": "^2.0.0"
   },
   "peerDependenciesMeta": {
-    "@opencode-ai/plugin": {
+    "@opencode/plugin": {
       "optional": true
     }
   }
