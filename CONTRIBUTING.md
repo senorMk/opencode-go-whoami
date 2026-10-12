@@ -19,18 +19,13 @@ Thanks for contributing. This is a small plugin with one strict rule, so please 
 ## Verify before opening a PR
 
 ```sh
-sh -n scripts/setup.sh          # shell syntax
-node bin/cli.mjs                # terminal check still works
+sh -n scripts/setup.sh scripts/link-global.sh
+bun test                       # uses fake credentials and temporary config directories
 ```
 
-If you touched `src/tui.tsx` or `scripts/setup.sh`, also run the sandboxed end-to-end install (uses a throwaway fake home — your real `~/.config/opencode` is never touched):
+The tests cover the server tool, guided setup, repeated upgrades, preserved labels/settings, and legacy symlink migration. Install the `@opencode/plugin` peer before running them. For type-checking, use TypeScript with `@types/node`, `solid-js`, `@opentui/core`, and `@opentui/solid` available, then run `tsc --noEmit`.
 
-```sh
-T=$(mktemp -d) && mkdir -p "$T/.local/share/opencode" \
-  && printf '{"opencode-go":{"type":"api","key":"sk-testFakeKey1234567890abcdef"}}' > "$T/.local/share/opencode/auth.json" \
-  && printf 'me@example.com\n' | HOME="$T" sh scripts/setup.sh \
-  && cat "$T/.config/opencode/tui.json" && rm -rf "$T"
-```
+When checking against a running v2 server, allow plugin initialization to finish before asserting on `plugin.list`: immediately after startup it may return an empty list.
 
 ## Screenshots
 

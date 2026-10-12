@@ -6,6 +6,18 @@ A tiny plugin that answers: **"which account am I signed in with right now?"**
 
 It shows each signed-in key as a masked snippet plus the **email you assign to it**, because OpenCode itself only stores keys — not emails. The safe source for the real email is always https://opencode.ai/auth.
 
+Requires **OpenCode v2**. The server tool and sidebar use the v2 plugin API.
+
+## Upgrade an existing installation
+
+If v2 reports “Plugin must export a default definition with an id and an effect or setup function”, run:
+
+```sh
+sh scripts/link-global.sh
+```
+
+Restart OpenCode afterwards. This updates the plugin and sidebar without asking for your emails again. Existing labels are kept, and legacy plugin files are moved to `~/.config/opencode/backups/`.
+
 ## Install (one command, ~1 minute)
 
 ```sh
@@ -64,16 +76,14 @@ Shows your keys and their short IDs, no setup needed.
 
 ## Uninstall
 
-Delete the installed files, and remove the sidebar line from `tui.json` — nothing else on your system is touched:
+Delete the installed plugin directory and command, then remove the `go-whoami` package entry from `cli.json`:
 
 ```sh
-rm ~/.config/opencode/plugins/go-whoami.ts \
-   ~/.config/opencode/plugins/go-whoami-whoami.ts \
-   ~/.config/opencode/plugins/go-whoami-tui.tsx \
-   ~/.config/opencode/command/go-whoami.md
+rm -r ~/.config/opencode/plugins/go-whoami
+rm ~/.config/opencode/command/go-whoami.md
 ```
 
-then delete the `["...go-whoami-tui.tsx", {}]` entry from the `"plugin"` list in `~/.config/opencode/tui.json`.
+If you upgraded from v1, also remove the old `go-whoami-tui.tsx` entry from `tui.json` if you still use that file.
 
 Your email list (`~/.config/opencode/go-accounts.json`) stays until you delete it.
 
@@ -99,7 +109,8 @@ In `~/.config/opencode/go-accounts.json` — a plain text file you can view or e
 - `bin/cli.mjs` — terminal check with no dependencies
 - `command/go-whoami.md` — the `/go-whoami` slash command
 - `scripts/setup.sh` — the guided installer above
-- `scripts/link-global.sh` — installer without the questions (advanced)
+- `scripts/link-global.sh` — install or upgrade without changing email labels
+- `scripts/install.mjs` — shared v2 installer; respects `XDG_CONFIG_HOME`
 
 ## License
 
