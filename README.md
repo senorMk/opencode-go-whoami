@@ -18,9 +18,13 @@ sh scripts/link-global.sh
 
 Restart OpenCode afterwards. This updates the plugin and sidebar without asking for your emails again. Existing labels are kept, and legacy plugin files are moved to `~/.config/opencode/backups/`.
 
-## Install (one command, ~1 minute)
+## Install (~1 minute)
+
+With OpenCode v2 and Node.js 22+ installed, sign in with `opencode auth login`, then clone this repository and run setup:
 
 ```sh
+git clone https://github.com/senorMk/opencode-go-whoami.git
+cd opencode-go-whoami
 sh scripts/setup.sh
 ```
 
